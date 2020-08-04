@@ -45,8 +45,8 @@
                                 "echo 'echo ----------------------------------- >> ~/log.txt' >> ~/autoGitPull.sh\n",
                                 "echo 'echo git_command_attempted >> ~/log.txt' >> ~/autoGitPull.sh\n",
                                 "echo 'sudo reboot' >> ~/autoGitPull.sh\n",
-								"sudo systemctl enable httpd\n"
-								
+                                "sudo systemctl enable httpd\n"
+
                             ]]
                     }
                 },
