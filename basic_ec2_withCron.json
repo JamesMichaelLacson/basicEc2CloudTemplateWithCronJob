@@ -1,0 +1,83 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+
+    "Description": "CloudFormation Testing",
+
+    "Resources": {
+        "MyInstance": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "AvailabilityZone": "us-east-1a",
+                "KeyName": "cloud",
+                "InstanceType": "t2.micro",
+                "ImageId": "ami-0c2d2cada5a76f157",
+                "SecurityGroupIds": ["sg-072b8aa96364223f3"],
+                "SubnetId": "subnet-5677a809",
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": ["", [
+                                "#!/bin/bash\n",
+                                "sudo yum update -y\n",
+                                "sudo yum install httpd -y\n",
+                                "cd /var/www/html/\n",
+                                "sudo systemctl start httpd\n",
+                                "git config --globlal user.name James\n",
+                                "git config --globlal user.email jamesmichaellacson@gmail.com\n",
+                                "git clone https://github.com/JamesMichaelLacson/101kittenclway.git\n",
+                                "cd 101kittenclway\n",
+                                "mv * ../\n",
+                                "sudo crontab -l > gitPull\n",
+                                "echo '30 * * * * ~/autoGitPull.sh' >> gitPull\n",
+                                "sudo crontab gitPull\n",
+                                "sudo touch ~/autoGitPull.sh\n",
+                                "sudo touch ~/log.txt\n",
+                                "sudo chmod 777 ~/autoGitPull.sh\n",
+                                "echo '#!/bin/bash' >> ~/autoGitPull.sh\n",
+                                "echo 'cd /var/www/html/101kittenclway' >> ~/autoGitPull.sh\n",
+                                "echo 'mv * ../' >> ~/autoGitPull.sh\n",
+                                "echo 'git pull origin master' >> ~/autoGitPull.sh\n",
+                                "echo 'sudo systemctl restart httpd' >> ~/autoGitPull.sh\n",
+                                "echo 'TODAY=$(date)' >> ~/autoGitPull.sh\n",
+                                "echo 'HOST=$(hostname)' >> ~/autoGitPull.sh\n",
+                                "echo 'echo ----------------------------------- >> ~/log.txt' >> ~/autoGitPull.sh\n",
+                                "echo 'echo Date-$TODAY >> ~/log.txt' >> ~/autoGitPull.sh\n",
+                                "echo 'echo HOST-$HOST >> ~/log.txt' >> ~/autoGitPull.sh\n",
+                                "echo 'echo ----------------------------------- >> ~/log.txt' >> ~/autoGitPull.sh\n",
+                                "echo 'echo git_command_attempted >> ~/log.txt' >> ~/autoGitPull.sh\n",
+                                "echo 'sudo reboot' >> ~/autoGitPull.sh\n",
+								"sudo systemctl enable httpd\n"
+								
+                            ]]
+                    }
+                },
+                "Tags": [{
+                        "Key": "Name",
+                        "Value": "fromCloud"
+                    }
+                ]
+            }
+        },
+        "SecondaryVolume": {
+            "Type": "AWS::EC2::Volume",
+            "Properties": {
+                "AvailabilityZone": "us-east-1a",
+                "Size": 8,
+                "VolumeType": "gp2"
+            }
+        },
+        "VolumeAttachment": {
+            "Type": "AWS::EC2::VolumeAttachment",
+            "Properties": {
+                "InstanceId": {
+                    "Ref": "MyInstance"
+                },
+                "VolumeId": {
+                    "Ref": "SecondaryVolume"
+                },
+                "Device": "/dev/xvdb"
+            }
+        }
+
+    },
+    "Outputs": {}
+}
